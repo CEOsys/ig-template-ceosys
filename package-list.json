@@ -6,7 +6,7 @@
   "list" : [
     {
       "version" : "0.1.0",
-      "path" : "http://fhir.org/templates/hl7.ca.fhir.template/0.3.0",
+      "path" : "https://github.com/CEOsys/ig-template-ceosys/releases/download/v0.1.0/package.tar.gz",
       "status" : "release",
       "sequence" : "Publications",
       "fhirversion" : "5.0.0",

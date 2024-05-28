@@ -19,6 +19,7 @@ jobs:
       new_release_version: ${{ steps.semantic_release_version.outputs.new_release_version }}
       last_release_version: ${{ steps.semantic_release_version.outputs.last_release_version }}
       prerelease: ${{ steps.check-prerelease.outputs.prerelease }}
+      new_release_git_tag: ${{ steps.semantic_release_version.outputs.new_release_git_tag }}
       
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +33,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo snap install yq
           npm install @semantic-release/changelog @semantic-release/github
 
       - name: Semantic Release (Determine new version)
@@ -89,51 +89,54 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "lts/*"
-
       - name: Install dependencies
         run: |
-          npm install @semantic-release/changelog @semantic-release/github
           sudo apt-get install -y jq
 
       - name: Read package ID from package-list.json
         id: read_package_data
         run: |
           PACKAGE_ID=$(jq -r '.["package-id"]' package-list.json)
-          echo "package_id=$PACKAGE_ID" >> $GITHUB_ENV
-          echo "::set-output name=package_id::$PACKAGE_ID"
+          echo "package_id=$PACKAGE_ID" >> $GITHUB_OUTPUT
           FHIR_VERSION=$(jq -r --arg version "${{ needs.check-release.outputs.last_release_version }}" '.list[] | select(.version == $version) | .fhirversion' package-list.json)
-          echo "fhir_version=$FHIR_VERSION" >> $GITHUB_ENV
-          echo "::set-output name=fhir_version::$FHIR_VERSION"
+          echo "fhir_version=$FHIR_VERSION" >> $GITHUB_OUTPUT
 
+      - name: Generate asset filename
+        id: generate-asset-filename
+        run: echo "ig_asset_filename=${{ steps.read_package_data.outputs.package_id }}-${{ needs.check-release.outputs.new_release_version }}.tgz" >> $GITHUB_OUTPUT
 
       - name: Display package_read output
         run: |
           echo "package-id: ${{ steps.read_package_data.outputs.package_id }}"
           echo "fhir-version: ${{ steps.read_package_data.outputs.fhir_version }}"
+          echo "ig-asset-filename: ${{ steps.generate-asset-filename.outputs.ig_asset_filename }}"
 
-          - name: Read and update package-list.json
-          run: |
-            # First, mark the last version as not current
-            jq --arg version "${{ needs.check-release.outputs.last_release_version }}" '.list[] |= (select(.version == $version) | .current = false)' package-list.json | \
-            # Then, add the new version as current
-            jq --arg version "${{ needs.check-release.outputs.new_release_version }}" --arg date "$(date -u +'%Y-%m-%d')" --arg package_id "${{ steps.read_package_data.outputs.package_id }}" '.list += [{
+      - name: Read and update package-list.json
+        run: |
+          # Store the modified JSON in a variable to avoid issues with piping and file rewriting
+          MODIFIED_JSON=$(jq --arg version "${{ needs.check-release.outputs.last_release_version }}" \
+            '(.list[] | select(.version == $version).current) = false' package-list.json)
+          
+          # Add the new version entry
+          MODIFIED_JSON=$(echo "$MODIFIED_JSON" | jq --arg version "${{ needs.check-release.outputs.new_release_version }}" \
+            --arg date "$(date -u +'%Y-%m-%d')" \
+            --arg package_id "${{ steps.read_package_data.outputs.package_id }}" \
+            --arg fhirversion "${{ steps.read_package_data.outputs.fhir_version }}" \
+            --arg path "https://github.com/${{ github.repository }}/releases/download/${{ needs.check-release.outputs.new_release_git_tag }}/${{ steps.generate-asset-filename.outputs.ig_asset_filename }}?raw=true" \
+            '.list += [{
               "version": $version,
-              "path": "https://github.com/CEOsys/ig-template-ceosys/releases/download/v$version/package.tar.gz",
+              "path": $path,
               "status": "release",
               "sequence": "Publications",
-              "fhirversion": "${{ steps.read_package_data.outputs.fhir_version }}",
-              "desc": "$package_id $version",
+              "fhirversion": $fhirversion,
+              "desc": ($package_id + " " + $version),
               "date": $date,
               "current": true
-            }]' > updated-package-list.json
-  
-            # Replace the original file with the updated one
-            mv updated-package-list.json package-list.json
+            }]')
 
+          # Output the modified JSON to the original file
+          echo "$MODIFIED_JSON" > package-list.json
+  
       - name: Commit and push updated package-list.json
         run: |
           git config user.name 'github-actions'
@@ -142,14 +145,19 @@ jobs:
           git commit -m "Update package-list.json for release ${{ needs.check-release.outputs.new_release_version }}"
           git push
 
-      - name: Generate asset filename
-        id: generate-asset-filename
-        run: echo "ig_asset_filename=${{ steps.read_package_data.outputs.package_id }}-${{ needs.check-release.outputs.new_release_version }}.tgz" >> $GITHUB_OUTPUT
-
       - name: Move package.tgz to output directory
         run: |
           mkdir -p dist/
-          tar -czf dist/${{ steps.generate-asset-filename.outputs.ig_asset_filename }} --exclude='.git' .
+          tar -czf ./dist/${{ steps.generate-asset-filename.outputs.ig_asset_filename }} --exclude='dist' --exclude='.git' -C . .
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Install dependencies
+        run: |
+          npm install @semantic-release/changelog @semantic-release/github
 
       - name: Semantic Release (Create release)
         id: semantic_release

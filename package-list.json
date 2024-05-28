@@ -5,6 +5,13 @@
   "introduction" : "This is the basic template for CEOsys IGs",
   "list" : [
     {
+      "version" : "current",
+      "desc" : "Continuous Integration Build (latest in version control)",
+      "path" : "https://build.fhir.org/ig/CEOsys/ig-template-ceosys",
+      "status" : "ci-build",
+      "current" : true
+    },
+    {
       "version" : "0.1.0",
       "path" : "https://github.com/CEOsys/ig-template-ceosys/releases/download/v0.1.0/package.tar.gz",
       "status" : "release",

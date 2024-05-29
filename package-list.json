@@ -1,25 +1,35 @@
 {
-  "package-id" : "de.netzwerk-universitaetsmedizin.ceosys.template",
-  "title" : "CEOsys template extension for FHIR IG",
-  "canonical" : "https://www.netzwerk-universitaetsmedizin.de/fhir/ceosys/ig-template-ceosyse",
-  "introduction" : "This is the basic template for CEOsys IGs",
-  "list" : [
+  "package-id": "de.netzwerk-universitaetsmedizin.ceosys.template",
+  "title": "CEOsys template extension for FHIR IG",
+  "canonical": "https://www.netzwerk-universitaetsmedizin.de/fhir/ceosys/ig-template-ceosyse",
+  "introduction": "This is the basic template for CEOsys IGs",
+  "list": [
     {
-      "version" : "current",
-      "desc" : "Continuous Integration Build (latest in version control)",
-      "path" : "https://build.fhir.org/ig/CEOsys/ig-template-ceosys",
-      "status" : "ci-build",
-      "current" : true
+      "version": "current",
+      "desc": "Continuous Integration Build (latest in version control)",
+      "path": "https://build.fhir.org/ig/CEOsys/ig-template-ceosys",
+      "status": "ci-build",
+      "current": true
     },
     {
-      "version" : "0.1.0",
-      "path" : "https://github.com/CEOsys/ig-template-ceosys/releases/download/v0.1.0/package.tar.gz",
-      "status" : "release",
-      "sequence" : "Publications",
-      "fhirversion" : "5.0.0",
-      "desc" : "Upgrade for dependency on fhir.base.template (again)",
-      "date" : "2023-10-27",
-      "current" : true
+      "version": "0.1.0",
+      "path": "https://github.com/CEOsys/ig-template-ceosys/releases/download/v0.1.0/package.tar.gz",
+      "status": "release",
+      "sequence": "Publications",
+      "fhirversion": "5.0.0",
+      "desc": "Upgrade for dependency on fhir.base.template (again)",
+      "date": "2023-10-27",
+      "current": false
+    },
+    {
+      "version": "0.1.1",
+      "path": "https://github.com/CEOsys/ig-template-ceosys/releases/download/v0.1.1/de.netzwerk-universitaetsmedizin.ceosys.template-0.1.1.tgz?raw=true",
+      "status": "release",
+      "sequence": "Publications",
+      "fhirversion": "5.0.0",
+      "desc": "de.netzwerk-universitaetsmedizin.ceosys.template 0.1.1",
+      "date": "2024-05-29",
+      "current": true
     }
   ]
 }

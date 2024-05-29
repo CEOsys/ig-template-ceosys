@@ -204,7 +204,7 @@ jobs:
           VERSION="${{ needs.perform-release.outputs.new_release_version }}"
           CREATOR="${{ github.actor }}"
           FHIR_VERSION="${{ needs.perform-release.outputs.fhir_version }}"
-          KIND="IG"
+          KIND="fhir.template"
 
           XML_FILE="package-feed.xml"
           ITEM_EXISTS=$(xmlstarlet sel -t -v "count(/rss/channel/item[title='$TITLE'])" $XML_FILE)

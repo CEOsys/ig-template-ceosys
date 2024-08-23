@@ -3,7 +3,7 @@
 <html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
-    <title>{{site.data.fhir.igId | upcase}}\{{site.data.pages[page.path].title | escape_once}} - FHIR v{{site.data.fhir.version}}</title>
+    <title>{{site.data.pages[page.path].title | escape_once}} - {{site.data.fhir.ig.title | escape_once}} v{{site.data.fhir.ig.version | escape_once}}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="author" content="http://hl7.org/fhir"/>
@@ -19,6 +19,8 @@
     <link href="{{site.data.info.assets}}assets/css/jquery-ui.css" rel="stylesheet"/>
   	<link href="{{site.data.info.assets}}assets/css/prism.css" rel="stylesheet" />
     {% include fragment-css.html %}
+
+    <script type="text/javascript" src="fhir-table-scripts.js"> </script>
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -36,7 +38,8 @@
   <body onload="document.body.style.opacity='1'">
 {% assign label = {{site.data.pages[page.path].label}} | split: '.0' %}
 	  <script src="{{site.data.info.assets}}assets/js/prism.js"></script>
-
+    <script type="text/javascript" src="{{site.data.info.assets}}assets/js/mermaid.js"></script>
+    <script type="text/javascript" src="{{site.data.info.assets}}assets/js/mermaid-init.js"></script>
     <style type="text/css">h2{--heading-prefix:"{{site.data.info.headingOffset}}{{label}}"}
     h3,h4,h5,h6{--heading-prefix:"{{site.data.info.headingOffset}}{{site.data.pages[page.path].label}}"}</style>
     <div id="segment-header" class="segment">  <!-- segment-header -->
@@ -48,7 +51,21 @@
 {% assign status = site.data.fhir.ig.status %}
 {% endif %}
         <div id="ig-status">
-          <p><span style="font-size:12pt;font-weight:bold">{{site.data.fhir.ig.title | escape_once}}</span><br/>{{site.data.fhir.ig.version}} - {{status}}</p>
+          <p><span style="font-size:12pt;font-weight:bold">{{site.data.fhir.ig.title | escape_once}}</span>
+            <br/>
+            <span style="display:inline-block;">{{site.data.fhir.ig.version}} - {{status}}
+{% assign igId = site.data.fhir.ig.id | prepend: "ImplementationGuide/" %}
+{% for jurisdiction in site.data.resources[igId].jurisdictions %}
+{% if jurisdiction.flag %}
+  <img alt="{{jurisdiction.name}} flag" src="assets/images/{{jurisdiction.flag}}.svg" height="16" title="{{jurisdiction.name}}"/>
+{% elsif jurisdiction.code %}
+  <span title="{{jurisdiction.name}}">{{jurisdiction.code}}</span>
+{% else %}
+  {{jurisdiction.name}}
+{% endif %}
+{% endfor %}
+            </span>
+          </p>
         </div>
       </div> <!-- /container -->
     </div>  <!-- /segment-header -->
@@ -84,7 +101,7 @@
 {% if shownav == 'y' %}
           <span style="float:right;">
 {% if site.data.pages[page.path].previous %}
-            <a href="{{site.data.pages[page.path].previous}}">&lt;prev</a> |
+            <a href="{{site.data.pages[page.path].previous}}">&lt;prev</a> | 
 {% endif %}
             <a href="#bottom">bottom</a>
 {% if site.data.pages[page.path].next %}

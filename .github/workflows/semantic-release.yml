@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install @semantic-release/changelog @semantic-release/github
+          npm install @semantic-release/changelog @semantic-release/github @semantic-release/npm
 
       - name: Semantic Release (Determine new version)
         id: semantic_release_version
@@ -42,6 +42,7 @@ jobs:
           extra_plugins: |
             @semantic-release/changelog
             @semantic-release/github
+            @semantic-release/npm
           dry_run: true
           ci: true
         env:
@@ -148,7 +149,11 @@ jobs:
       - name: Move package.tgz to output directory
         run: |
           mkdir -p dist/
-          tar -czf ./dist/${{ steps.generate-asset-filename.outputs.ig_asset_filename }} --exclude='dist' --exclude='.git' -C . .
+          tar -czf ./dist/${{ steps.generate-asset-filename.outputs.ig_asset_filename }} \
+            --exclude='dist' \
+            --exclude='.git' \
+            --exclude='.*' \
+            -C . .
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

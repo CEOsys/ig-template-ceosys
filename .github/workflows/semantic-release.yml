@@ -136,19 +136,30 @@ jobs:
 
           # Output the modified JSON to the original file
           echo "$MODIFIED_JSON" > package-list.json
+
+      - name: Update version in package/package.json
+        run: |
+          VERSION="${{ needs.check-release.outputs.new_release_version }}"
+          echo "Updating package/package.json to version=${VERSION}"
+          jq ".version=\"${VERSION}\"" package/package.json > package/tmp.json
+          mv package/tmp.json package/package.json
   
       - name: Commit and push updated package-list.json
         run: |
           git config user.name 'github-actions'
           git config user.email 'github-actions@github.com'
+          git add package/package.json
           git add package-list.json
-          git commit -m "Update package-list.json for release ${{ needs.check-release.outputs.new_release_version }}"
+          git commit -m "Update package-list.json / package.json for release ${{ needs.check-release.outputs.new_release_version }}"
           git push
 
       - name: Move package.tgz to output directory
         run: |
           mkdir -p dist/
-          tar -czf ./dist/${{ steps.generate-asset-filename.outputs.ig_asset_filename }} --exclude='dist' --exclude='.git' -C . .
+          tar -czf ./dist/${{ steps.generate-asset-filename.outputs.ig_asset_filename }} \
+            --exclude='dist' \
+            --exclude='.[^/]*' \
+            -C . *
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -257,3 +268,4 @@ jobs:
           gh pr create --repo ${{ env.FHIR_PACKAGE_FEED_REPO }} --head $NEW_BRANCH --base main --title "Add ${{ needs.perform-release.outputs.package_id }}-${{ needs.perform-release.outputs.new_release_version }}" --body "Automated update of package-feed.xml with new release information"
         env:
           GITHUB_TOKEN: ${{ secrets.FHIR_PACKAGE_FEED_REPO_TOKEN }}
+

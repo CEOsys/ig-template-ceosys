@@ -29,6 +29,16 @@
       "fhirversion": "5.0.0",
       "desc": "de.netzwerk-universitaetsmedizin.ceosys.template 0.1.1",
       "date": "2024-05-29",
+      "current": false
+    },
+    {
+      "version": "0.1.2",
+      "path": "https://github.com/CEOsys/ig-template-ceosys/releases/download/v0.1.2/de.netzwerk-universitaetsmedizin.ceosys.template-0.1.2.tgz?raw=true",
+      "status": "release",
+      "sequence": "Publications",
+      "fhirversion": "5.0.0",
+      "desc": "de.netzwerk-universitaetsmedizin.ceosys.template 0.1.2",
+      "date": "2025-01-31",
       "current": true
     }
   ]
